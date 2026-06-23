@@ -6,14 +6,6 @@ const {
 const { handleFileRequest } = require("./parse_file.js");
 const { handleContribScoresRequest } = require("./contribscores.js");
 const {
-    handleSpeedrunRequest,
-    SB64_VARIABLES,
-    SB64_DEFAULTS,
-    SR_CATEGORY_IDS,
-    SR_VARIABLES,
-    SR_DEFAULTS
-} = require("./speedrun.js");
-const {
     WIKIS,
     toggleContribScore
 } = require("../config.js");
@@ -382,74 +374,6 @@ async function handleInteraction(interaction) {
             }
         } catch (err) {
             return sendInteractionError(interaction, err, 'lbwiki');
-        }
-    } else if (interaction.commandName === 'speedrun') {
-        try {
-            const subCommand = interaction.options.getSubcommand();
-            let response;
-            if (subCommand === 'sb64') {
-                const categoryId = interaction.options.getString('category');
-                const character = interaction.options.getString('character') || SB64_DEFAULTS.CHARACTER; // Default to Both
-                const glitches = interaction.options.getBoolean('glitches');
-
-                const variables = {};
-                variables[SB64_VARIABLES.CHARACTER] = character;
-                variables[SB64_VARIABLES.GLITCHES] = glitches ? SB64_DEFAULTS.GLITCHES_ON : SB64_DEFAULTS.GLITCHES_OFF; // true = Glitches, false/null = Glitchless
-
-                response = await handleSpeedrunRequest(interaction, 'sb64', categoryId, null, variables);
-            } else if (subCommand === 'sr') {
-                const filter = interaction.options.getString('filter');
-                const version = interaction.options.getString('version');
-                let levelId = interaction.options.getString('level');
-                const events = interaction.options.getString('events') || SR_DEFAULTS.EVENTS; // Default to No Events
-
-                const variables = {};
-                variables[SR_VARIABLES.EVENTS] = events;
-
-                let categoryId;
-                if (filter === 'individual_map') {
-                    if (!levelId) {
-                        return interaction.reply({ content: 'You must select a level when using the "Individual map" filter.', ephemeral: true });
-                    }
-                    if (version === 'v13') {
-                        categoryId = SR_CATEGORY_IDS.INDIVIDUAL_LEVELS_V13;
-                    } else if (version === 'v12') {
-                        categoryId = SR_CATEGORY_IDS.INDIVIDUAL_LEVELS_V12;
-                    } else if (version === 'v10') {
-                        categoryId = SR_CATEGORY_IDS.INDIVIDUAL_LEVELS_V10;
-                    }
-                } else {
-                    // Full game or Full game with lobby
-                    categoryId = SR_CATEGORY_IDS.ALL_MAPS;
-                    levelId = null; // Ensure levelId is cleared for full-game categories
-
-                    if (filter === 'full_game_lobby') {
-                        variables[SR_VARIABLES.VERSIONS] = SR_DEFAULTS.VERSION_LOBBY;
-                    } else {
-                        if (version === 'v13') {
-                            variables[SR_VARIABLES.VERSIONS] = SR_DEFAULTS.VERSION_V13;
-                        } else if (version === 'v12') {
-                            variables[SR_VARIABLES.VERSIONS] = SR_DEFAULTS.VERSION_V12;
-                        } else if (version === 'v10') {
-                            variables[SR_VARIABLES.VERSIONS] = SR_DEFAULTS.VERSION_V11; // Map V10 to V11 for full game
-                        }
-                    }
-                }
-
-                response = await handleSpeedrunRequest(interaction, 'sr', categoryId, levelId, variables);
-            } else if (subCommand === 'abj') {
-                const categoryId = interaction.options.getString('category');
-                response = await handleSpeedrunRequest(interaction, 'abj', categoryId);
-            } else {
-                return interaction.reply({ content: 'Unknown subcommand.', ephemeral: true }).catch(() => {});
-            }
-
-            if (response && response.id) {
-                botToAuthorMap.set(response.id, interaction.user.id);
-                pruneMap(botToAuthorMap);
-            }
-        } catch (err) {
-            return sendInteractionError(interaction, err, 'speedrun');
         }
     } else if (interaction.commandName === 'wiki') {
         const wikiKey = interaction.options.getString('wiki');
