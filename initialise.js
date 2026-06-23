@@ -18,7 +18,6 @@ const {
 
 const {
     WIKIS,
-    CATEGORY_WIKI_MAP,
     STATUS_INTERVAL_MS
 } = require("./config.js");
 
@@ -78,7 +77,7 @@ function getWikiAndPage(messageContent, channelParentId) {
     if (prefix) {
         wikiConfig = WIKIS[PREFIX_WIKI_MAP[prefix]];
     } else {
-        const wikiKey = CATEGORY_WIKI_MAP[channelParentId] || "superstar-racers";
+        const wikiKey = "sewh";
         wikiConfig = WIKIS[wikiKey];
     }
 
